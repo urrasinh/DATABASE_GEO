@@ -60,7 +60,7 @@ app.get('/api/filtros', (req, res) => {
 // Endpoint: Listar lugares con filtrado y paginación
 app.get('/api/lugares', (req, res) => {
     const { zona, region, jerarquia, tipo, subtipo, categoria, tipo_propiedad, demanda_turistica, limite = 21, pagina = 1, search, sort = 'id', order = 'ASC' } = req.query;
-    
+
     let whereClauses = [];
     let params = [];
 
@@ -149,7 +149,7 @@ app.get('/api/autocomplete', (req, res) => {
         WHERE LOWER(nombre) LIKE ? OR LOWER(codigo) LIKE ? 
         LIMIT 6
     `;
-    
+
     db.all(query, [searchTerm, searchTerm], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);

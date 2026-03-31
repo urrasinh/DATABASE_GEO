@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:3000/api' 
+    : 'https://TU-PROYECTO.onrender.com/api';
 let authToken = localStorage.getItem('adminToken');
 let currentPage = 1;
 let currentSort = 'id';
@@ -28,7 +30,7 @@ async function loadAdminMapsScript() {
     try {
         const configRes = await fetch(`${API_URL}/config/maps`);
         const configData = await configRes.json();
-        
+
         if (configData.apiKey && configData.apiKey !== 'YOUR_GOOGLE_MAPS_API_KEY_HERE') {
             window.initAutocomplete = () => {
                 const input = document.getElementById('f-direccion');
@@ -61,7 +63,7 @@ loginForm.addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
-        
+
         const data = await res.json();
         if (res.ok) {
             authToken = data.token;
@@ -96,10 +98,10 @@ async function fetchFilterDatalists() {
     try {
         const res = await fetch(`${API_URL}/filtros`);
         const data = await res.json();
-        
+
         // Define all categories that need a datalist
         const categories = [
-            'region', 'provincia', 'comuna', 'localidad', 'jerarquia', 
+            'region', 'provincia', 'comuna', 'localidad', 'jerarquia',
             'categoria', 'tipo', 'subtipo', 'tipo_propiedad', 'demanda_turistica'
         ];
 
@@ -113,7 +115,7 @@ async function fetchFilterDatalists() {
                     dl.appendChild(opt);
                 });
             }
-            
+
             // Populate Dropdown Filters in Dashboard
             const sel = document.getElementById(`filter-${cat}`);
             if (sel && data[cat]) {
@@ -139,14 +141,14 @@ async function loadTableData() {
         const region = document.getElementById('filter-region')?.value;
         const categoria = document.getElementById('filter-categoria')?.value;
         const jerarquia = document.getElementById('filter-jerarquia')?.value;
-        
+
         const params = new URLSearchParams({
             pagina: currentPage,
             limite: 200,
             sort: currentSort,
             order: sortDirection
         });
-        
+
         if (search) params.append('search', search);
         if (region) params.append('region', region);
         if (categoria) params.append('categoria', categoria);
@@ -154,20 +156,20 @@ async function loadTableData() {
 
         const res = await fetch(`${API_URL}/lugares?${params.toString()}`);
         const data = await res.json();
-        
+
         if (data.error) throw new Error(data.error);
-        
+
         tableBody.innerHTML = '';
-        
+
         document.querySelectorAll('.page-indicator').forEach(el => {
             el.textContent = `Pág. ${data.pagination.currentPage} de ${data.pagination.totalPages}`;
         });
-        
+
         const countSpan = document.getElementById('total-fichas-count');
         if (countSpan) {
             countSpan.innerHTML = `Mostrando <strong>${data.data.length}</strong> de <strong>${data.pagination.total}</strong>`;
         }
-        
+
         data.data.forEach(lugar => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -184,7 +186,7 @@ async function loadTableData() {
             tableBody.appendChild(tr);
         });
     } catch (err) {
-        if(err.message.includes('401') || err.message.includes('403')) {
+        if (err.message.includes('401') || err.message.includes('403')) {
             // Token expired
             document.getElementById('btn-logout').click();
         }
@@ -194,7 +196,7 @@ async function loadTableData() {
 
 // Pagination
 document.querySelectorAll('.btn-prev-page').forEach(btn => {
-    btn.addEventListener('click', () => { if(currentPage>1) { currentPage--; loadTableData(); }});
+    btn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadTableData(); } });
 });
 document.querySelectorAll('.btn-next-page').forEach(btn => {
     btn.addEventListener('click', () => { currentPage++; loadTableData(); });
@@ -210,11 +212,11 @@ document.querySelectorAll('th.sortable').forEach(th => {
             currentSort = sortField;
             sortDirection = 'ASC';
         }
-        
+
         // Update visual icons
         document.querySelectorAll('th.sortable i').forEach(i => i.className = 'bx bx-sort');
         const icon = th.querySelector('i');
-        if(icon) {
+        if (icon) {
             icon.className = sortDirection === 'ASC' ? 'bx bx-sort-up' : 'bx bx-sort-down';
         }
 
@@ -246,9 +248,9 @@ window.openEdit = async (id) => {
     try {
         const res = await fetch(`${API_URL}/lugares/${id}`);
         const lugar = await res.json();
-        
+
         document.getElementById('modal-title').textContent = `Editando: ${lugar.nombre}`;
-        
+
         // Populate inputs
         document.getElementById('f-id').value = lugar.id;
         document.getElementById('f-codigo').value = lugar.codigo || '';
@@ -283,7 +285,7 @@ window.deleteLugar = async (id) => {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
-            if(res.ok) {
+            if (res.ok) {
                 loadTableData();
             } else {
                 alert('No se pudo eliminar');
@@ -299,7 +301,7 @@ fichaForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('f-id').value;
     const msgEl = document.getElementById('form-msg');
-    
+
     // Collect data
     const payload = {
         codigo: document.getElementById('f-codigo').value,
@@ -330,7 +332,7 @@ fichaForm.addEventListener('submit', async (e) => {
 
         const res = await fetch(url, {
             method,
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },

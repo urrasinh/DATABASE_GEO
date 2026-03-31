@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:3000/api' 
+    : 'https://TU-PROYECTO.onrender.com/api';
 
 // Estado de la aplicación
 const state = {
@@ -112,7 +114,7 @@ function setupEventListeners() {
             try {
                 const res = await fetch(`${API_URL}/autocomplete?q=${encodeURIComponent(q)}`);
                 const data = await res.json();
-                
+
                 if (data.length > 0) {
                     suggestionsList.innerHTML = data.map(item => `
                         <li onclick="window.location.href='lugar.html?id=${item.id}'">
@@ -197,7 +199,7 @@ async function fetchFiltros() {
     try {
         const res = await fetch(`${API_URL}/filtros`);
         const data = await res.json();
-        
+
         populateSelect(selectors.zona, data.zonas);
         populateSelect(selectors.region, data.region);
         populateSelect(selectors.tipo, data.tipo);
@@ -224,7 +226,7 @@ function populateSelect(selectEl, optionsArray) {
 async function fetchLugares() {
     try {
         grid.innerHTML = `<div class="loading-spinner"><i class='bx bx-loader-alt bx-spin'></i> Buscando aventuras...</div>`;
-        
+
         // Construir query string
         const params = new URLSearchParams();
         Object.keys(state.filters).forEach(key => {
@@ -235,10 +237,10 @@ async function fetchLugares() {
 
         const res = await fetch(`${API_URL}/lugares?${params.toString()}`);
         const result = await res.json();
-        
+
         state.pagination.totalItems = result.pagination.total;
         state.pagination.totalPages = result.pagination.totalPages;
-        
+
         renderGrid(result.data);
         updatePaginationUI();
     } catch (err) {
@@ -249,7 +251,7 @@ async function fetchLugares() {
 
 function renderGrid(lugares) {
     grid.innerHTML = '';
-    
+
     if (lugares.length === 0) {
         grid.innerHTML = `
             <div class="error-glass" style="grid-column: 1/-1;">
@@ -264,7 +266,7 @@ function renderGrid(lugares) {
         // Unsplash Random nature/chile/type image
         const queryTerm = encodeURIComponent(lugar.categoria || 'nature');
         const imgUrl = `https://source.unsplash.com/random/400x300/?chile,${queryTerm},landscape&sig=${lugar.id}`; // using sig avoids same cache
-        
+
         const card = document.createElement('a');
         card.href = `lugar.html?id=${lugar.id}`;
         card.className = 'card-glass';
@@ -296,7 +298,7 @@ function renderGrid(lugares) {
 function updatePaginationUI() {
     totalResults.textContent = state.pagination.totalItems;
     pInfo.textContent = `Página ${state.pagination.page} de ${state.pagination.totalPages || 1}`;
-    
+
     btnPrev.disabled = state.pagination.page <= 1;
     btnNext.disabled = state.pagination.page >= state.pagination.totalPages;
 }
@@ -305,7 +307,7 @@ function updatePaginationUI() {
 function cleanFormat(str) {
     if (!str) return '';
     str = String(str).trim();
-    if(str.length === 0) return '';
+    if (str.length === 0) return '';
     // Capitalize first letter, lowercase rest
     return str.replace(/\w\S*/g, (txt) => {
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();

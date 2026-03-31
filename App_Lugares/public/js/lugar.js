@@ -1,3 +1,7 @@
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:3000/api' 
+    : 'https://TU-PROYECTO.onrender.com/api';
+
 document.addEventListener('DOMContentLoaded', initFicha);
 
 async function initFicha() {
@@ -10,7 +14,7 @@ async function initFicha() {
     }
 
     try {
-        const res = await fetch(`http://localhost:3000/api/lugares/${placeId}`);
+        const res = await fetch(`${API_URL}/lugares/${placeId}`);
         if (!res.ok) throw new Error('Lugar no encontrado en la base de datos');
         
         const data = await res.json();
@@ -23,7 +27,7 @@ async function initFicha() {
 
 async function fetchAndLoadMap(placeData) {
     try {
-        const configRes = await fetch('http://localhost:3000/api/config/maps');
+        const configRes = await fetch(`${API_URL}/config/maps`);
         const configData = await configRes.json();
         
         if (configData.apiKey && configData.apiKey !== 'YOUR_GOOGLE_MAPS_API_KEY_HERE') {
